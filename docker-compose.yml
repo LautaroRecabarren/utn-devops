@@ -1,0 +1,38 @@
+version: "3.5"
+services:
+  php:
+    container_name: apache2_php
+    image: docker-registry.int:5000/myapp-example
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    depends_on:
+      - db_server
+    domainname: ${CONTAINER_DOMAIN}
+    hostname: ${CONTAINER_HOSTNAME}
+    env_file:
+      - .env
+    networks:
+      default:
+        aliases:
+          - ${CONTAINER_HOSTNAME}.${CONTAINER_DOMAIN}
+    #volumes:
+      #- .:/var/www/html # uncomment for local development
+  db_server:
+    image: mysql:5.7
+    #container_name:
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - MYSQL_DATABASE=${DB_DATABASE}
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "4400:3306"
+    volumes:
+      - /var/db/mysql:/var/lib/mysql
+    networks:
+      - default
+networks:
+  default:
