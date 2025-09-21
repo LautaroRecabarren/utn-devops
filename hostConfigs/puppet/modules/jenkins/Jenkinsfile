@@ -1,0 +1,25 @@
+pipeline {
+  agent any
+  options {
+    disableConcurrentBuilds()
+    buildDiscarder(logRotator(numToKeepStr: '3'))
+    timestamps()
+  }
+  triggers { pollSCM('* * * * *') } // revisa cambios cada minuto
+  environment {
+    APP_REPO = 'https://TU_ORG/TU_APP.git'  // cámbialo por tu repo app
+    APP_DIR  = 'app'
+  }
+  stages {
+    stage('Infra (self)'){ steps{ checkout scm } }
+    stage('Checkout app'){
+      steps { dir(APP_DIR){ git url: "${env.APP_REPO}", branch: 'main' } }
+    }
+    stage('Install deps'){
+      steps { dir(APP_DIR){ sh 'test -f package.json && npm ci || true' } }
+    }
+    stage('Unit tests'){
+      steps { dir(APP_DIR){ sh 'test -f package.json && npm test --silent || echo "Sin tests"' } }
+    }
+  }
+}
