@@ -5,21 +5,25 @@ pipeline {
     buildDiscarder(logRotator(numToKeepStr: '3'))
     timestamps()
   }
-  triggers { pollSCM('* * * * *') } // revisa cambios cada minuto
+  triggers { pollSCM('* * * * *') }
+
   environment {
-    APP_REPO = 'https://TU_ORG/TU_APP.git'  // cámbialo por tu repo app
-    APP_DIR  = 'app'
+    APP_REPO   = 'https://github.com/LautaroRecabarren/utn-devops-app.git'
+    APP_BRANCH = 'unidad-4-jenkins'
+    APP_DIR    = 'app'
   }
+
   stages {
-    stage('Infra (self)'){ steps{ checkout scm } }
+    stage('Checkout infra (self)'){ steps { checkout scm } }
     stage('Checkout app'){
-      steps { dir(APP_DIR){ git url: "${env.APP_REPO}", branch: 'main' } }
+      steps { dir(APP_DIR){ git url: "${env.APP_REPO}", branch: "${env.APP_BRANCH}" } }
     }
-    stage('Install deps'){
-      steps { dir(APP_DIR){ sh 'test -f package.json && npm ci || true' } }
-    }
-    stage('Unit tests'){
-      steps { dir(APP_DIR){ sh 'test -f package.json && npm test --silent || echo "Sin tests"' } }
-    }
+    stage('Install deps'){ steps { dir(APP_DIR){ sh 'npm ci' } } }
+    stage('Unit tests'){ steps { dir(APP_DIR){ sh 'npm test --silent' } } }
+  }
+
+  post {
+    success { echo 'Build & tests OK' }
+    failure { echo 'Build FAILED' }
   }
 }
