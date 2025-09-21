@@ -1,5 +1,6 @@
 pipeline {
   agent any
+  tools { nodejs 'node22' }
   options {
     disableConcurrentBuilds()
     buildDiscarder(logRotator(numToKeepStr: '3'))
