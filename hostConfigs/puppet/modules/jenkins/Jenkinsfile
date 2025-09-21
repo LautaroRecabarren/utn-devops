@@ -19,7 +19,7 @@ pipeline {
       steps { dir(APP_DIR){ git url: "${env.APP_REPO}", branch: "${env.APP_BRANCH}" } }
     }
     stage('Install deps'){ steps { dir(APP_DIR){ sh 'npm ci' } } }
-    stage('Unit tests'){ steps { dir(APP_DIR){ sh 'npm test --silent' } } }
+    stage('Unit tests'){ steps { dir(APP_DIR){ sh 'npm test' } } }
   }
 
   post {
